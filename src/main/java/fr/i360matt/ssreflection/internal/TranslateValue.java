@@ -7,9 +7,11 @@ import java.util.Map;
 
 public class TranslateValue {
 
-    public static Object load (Object brut, Class<?> type, String path, Gson gson) {
+    protected static Object load (Object brut, Class<?> type, String path, Gson gson) {
         try {
-            if (type == int.class)
+            if (brut == null)
+                return null;
+            else if (type == int.class)
                 return Integer.parseInt(brut.toString());
             else if (type == long.class)
                 return Long.parseLong(brut.toString());
@@ -25,17 +27,13 @@ public class TranslateValue {
                 return brut;
             return gson.fromJson(brut.toString(), type);
         } catch (NumberFormatException e) {
-
             throw new RuntimeException("Field '" + path + "' require value type [" + type.getName() + "], but given '" + brut + "'");
         }
-
-
-
-
     }
 
-    public static Object save (Object brut, Class<?> type, Gson gson) {
-        boolean cond = type.isPrimitive();
+    protected static Object save (Object brut, Class<?> type, Gson gson) {
+        boolean cond = type == null;
+        cond = cond || type.isPrimitive();
         cond = cond || type == String.class;
         cond = cond || type == String[].class;
         cond = cond || type == Map.class;

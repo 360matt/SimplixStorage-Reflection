@@ -8,7 +8,6 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class Reflect {
 
@@ -22,52 +21,37 @@ public class Reflect {
 
     public void load () {
         try {
-            loadRecursive((fieldEditor) -> {
-
+            doRecursively((fieldEditor) -> {
                 final String path = fieldEditor.getPath();
 
-                final Object value;
-
-                final Object brut = this.config.get(path);
-                if (brut != null) {
-                    value = TranslateValue.load(brut, fieldEditor.getField().getType(), path, gson);
-                    if (value == null)
-                        return;
-
-                    try {
-                        fieldEditor.getField().set(fieldEditor.getInstance(), value);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                }
+                final Object value = TranslateValue.load(this.config.get(path), fieldEditor.getField().getType(), path, gson);
+                if (value == null)
+                    return;
+                fieldEditor.getField().set(fieldEditor.getInstance(), value);
             });
-        } catch (IllegalAccessException e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
     }
 
     public void save () {
         try {
-            loadRecursive((fieldEditor) -> {
-                try {
-                    final Object brut = fieldEditor.getField().get(fieldEditor.getInstance());
-                    final Object value = TranslateValue.save(brut, fieldEditor.getField().getType(), gson);
-                    this.config.getFileData().insert(fieldEditor.getPath(), value);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
+            doRecursively((fieldEditor) -> {
+                final Object brut = fieldEditor.getField().get(fieldEditor.getInstance());
+                final Object value = TranslateValue.save(brut, fieldEditor.getField().getType(), gson);
+                this.config.getFileData().insert(fieldEditor.getPath(), value);
             });
             this.config.write();
-        } catch (IllegalAccessException e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
     }
 
-    public void loadRecursive (Consumer<FieldEditor> consumer) throws IllegalAccessException {
+    public void doRecursively (ThrowableConsumer<FieldEditor> consumer) throws Throwable {
         this.loadRecursive("", this, consumer);
     }
 
-    private void loadRecursive (String prefix, Object instance, Consumer<FieldEditor> consumer) throws IllegalAccessException {
+    private void loadRecursive (String prefix, Object instance, ThrowableConsumer<FieldEditor> consumer) throws Throwable {
         for (final Field field : instance.getClass().getDeclaredFields()) {
 
             boolean cond = field.getType().isPrimitive();

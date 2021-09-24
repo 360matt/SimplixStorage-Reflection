@@ -26,8 +26,10 @@ public class Test {
         assertEquals("Heey", configReflect.text);
         assertEquals(666, configReflect.number);
         assertTrue(configReflect.map.containsKey("ok"));
-        assertTrue(configReflect.list.contains(20));
-        assertTrue(configReflect.list.contains(50));
+
+
+
+
 
 
 
