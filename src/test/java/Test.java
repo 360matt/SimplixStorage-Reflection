@@ -4,7 +4,7 @@ import java.util.Arrays;
 public class Test {
 
     @org.junit.Test
-    public static void main (String[] args) {
+    public void main () {
 
         ExampleData configReflect = new ExampleData();
 
